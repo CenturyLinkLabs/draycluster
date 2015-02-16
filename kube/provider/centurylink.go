@@ -23,6 +23,7 @@ type Centurylink struct {
 	masterPuK   string
 	uname       string
 	password    string
+    miCount     int
 	minionPorts []int
 }
 
@@ -38,16 +39,15 @@ func NewCenturylink() *Centurylink {
 func (clc Centurylink) ProvisionCluster() ([]deploy.CloudServer, error) {
 	utils.LogInfo("\nProvisioning Server Cluster in Centurylink")
 
-	cnt, e := strconv.Atoi(os.Getenv("MINION_COUNT"))
-	utils.LogInfo("\nMinion Count: " + strconv.Itoa(cnt))
+	utils.LogInfo("\nMinion Count: " + strconv.Itoa(clc.miCount))
 
-	e = clc.initProvider()
+	e := clc.initProvider()
 	if e != nil {
 		return nil, e
 	}
 
 	var servers []deploy.CloudServer
-	for i := 0; i < cnt+1; i++ {
+	for i := 0; i < clc.miCount+1; i++ {
 		pk := ""
 		if i == 0 {
 			utils.LogInfo("\nDeploying Kubernetes Master...")
@@ -88,6 +88,7 @@ func (clc *Centurylink) initProvider() error {
 	clc.cpu, _ = strconv.Atoi(os.Getenv("CPU"))
 	clc.memGb, _ = strconv.Atoi(os.Getenv("MEMORY_GB"))
 	ps := os.Getenv("OPEN_TCP_PORTS")
+    clc.miCount, _ = strconv.Atoi(os.Getenv("MINION_COUNT"))
 
 	if ps != "" {
 		s := strings.Split(ps, ",")
@@ -103,8 +104,8 @@ func (clc *Centurylink) initProvider() error {
 		return errors.New("\n\nMissing Params.. in cluster creation...Check Docs....\n\n")
 	}
 
-	if clc.cpu <= 0 || clc.memGb <= 0 {
-		return errors.New("\n\nMake sure CPU & MemoryGB values are greater than 0.\n\n")
+	if clc.cpu <= 0 || clc.memGb <= 0 || clc.miCount <= 0 {
+		return errors.New("\n\nMake sure CPU, MemoryGB and MINION_COUNT values are greater than 0.\n\n")
 	}
 
 	pk, puk, err := utils.CreateSSHKey()

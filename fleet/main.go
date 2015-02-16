@@ -2,13 +2,11 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/CenturylinkLabs/draycluster/fleet/provider"
 	"github.com/CenturylinkLabs/draycluster/utils"
-	"os"
-	"strconv"
 	"strings"
-)
+    "os"
+    "fmt")
 
 func main() {
 
@@ -19,10 +17,7 @@ func main() {
 		}
 	}()
 
-	c, e := strconv.Atoi(os.Getenv("MINION_COUNT"))
-	if c == 0 || e != nil {
-		panic("\nPlease make sure you have at least one minion in the cluster.")
-	}
+    utils.CreateRootCerts()
 
 	cfg, e := utils.LoadJsonConfig()
 

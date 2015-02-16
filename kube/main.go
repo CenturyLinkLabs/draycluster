@@ -6,7 +6,6 @@ import (
 	"github.com/CenturylinkLabs/draycluster/kube/provider"
 	"github.com/CenturylinkLabs/draycluster/utils"
 	"os"
-	"strconv"
 	"strings"
 )
 
@@ -19,10 +18,7 @@ func main() {
 		}
 	}()
 
-	c, e := strconv.Atoi(os.Getenv("MINION_COUNT"))
-	if c == 0 || e != nil {
-		panic("\nPlease make sure you have at least one minion in the cluster.")
-	}
+    utils.CreateRootCerts()
 
 	cfg, e := utils.LoadJsonConfig()
 

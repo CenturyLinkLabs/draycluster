@@ -32,7 +32,6 @@ type Amazon struct {
 }
 
 func (amz *Amazon) DeployVMs() ([]CloudServer, error) {
-
 	var e error
 	e = amz.init()
 	if e != nil {

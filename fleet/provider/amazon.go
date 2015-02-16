@@ -17,7 +17,7 @@ type Amazon struct {
 // NewAmazon is used to create a new client for using Amazon client to
 // create RHEL 7 server cluster.
 func NewAmazon() *Amazon {
-	cl := new(Amazon)
+    cl := new(Amazon)
 	return cl
 }
 
@@ -29,7 +29,7 @@ func (amz *Amazon) ProvisionCluster() ([]deploy.CloudServer, error) {
 	apiK := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	loc := os.Getenv("REGION")
 	vmSize := os.Getenv("VM_SIZE")
-	cnt, e := strconv.Atoi(os.Getenv("MINION_COUNT"))
+	cnt, e := strconv.Atoi(os.Getenv("NODE_COUNT"))
 
 	if apiID == "" || apiK == "" || loc == "" || vmSize == "" {
 		return nil, errors.New("\n\nMissing Params Or No Matching AMI found...Check Docs...\n\n")
@@ -43,7 +43,7 @@ func (amz *Amazon) ProvisionCluster() ([]deploy.CloudServer, error) {
 	c.Location = loc
 	c.PrivateKey = pk
 	c.PublicKey = puk
-	c.ServerCount = cnt + 1
+	c.ServerCount = cnt
 	c.VMSize = vmSize
 	c.AmiName = "CoreOS-stable-557.2.0-hvm"
 	c.AmiOwnerId = "595879546273"
@@ -67,16 +67,6 @@ func (amz *Amazon) ProvisionCluster() ([]deploy.CloudServer, error) {
 	if e != nil {
 		return nil, e
 	}
-
-//	for _, s := range servers {
-//		s.PublicSSHKey = puk
-//		if s.Name != snMaster {
-//			s.PrivateSSHKey = ""
-//		} else {
-//			cmd := fmt.Sprintf("echo -e \"%s\" >> ~/.ssh/id_rsa && chmod 400 ~/.ssh/id_rsa", s.PrivateSSHKey)
-//			c.ExecSSHCmd(s.PublicIP, s.PrivateSSHKey, cmd)
-//		}
-//	}
 
 	utils.LogInfo("\nCluster Creation Complete...")
 	utils.SetKey("AMAZON_SSH_KEY_NAME", c.SSHKeyName)
