@@ -17,6 +17,8 @@ func main() {
 		}
 	}()
 
+    utils.CreateRootCerts()
+
 	utils.LogInfo("\nDeploying Agent Server...")
 	e := utils.LoadStdinToEnvAndKeys()
 	if e != nil {
