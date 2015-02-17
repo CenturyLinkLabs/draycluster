@@ -29,7 +29,7 @@ func (amz Amazon) ProvisionAgent() (deploy.CloudServer, error) {
 	}
 
 	var pk, puk, kn string
-	if os.Getenv("MASTER_PUBLIC_KEY") != "" && os.Getenv("AMAZON_MASTER_KEY_NAME") != "" {
+	if os.Getenv("MASTER_PUBLIC_KEY") != "" && os.Getenv("MASTER_PRIVATE_KEY") != "" {
 		s1, _ := base64.StdEncoding.DecodeString(os.Getenv("MASTER_PRIVATE_KEY"))
 		s2, _ := base64.StdEncoding.DecodeString(os.Getenv("MASTER_PUBLIC_KEY"))
 		pk = string(s1)
