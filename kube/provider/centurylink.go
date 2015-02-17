@@ -39,9 +39,9 @@ func NewCenturylink() *Centurylink {
 func (clc Centurylink) ProvisionCluster() ([]deploy.CloudServer, error) {
 	utils.LogInfo("\nProvisioning Server Cluster in Centurylink")
 
+    e := clc.initProvider()
 	utils.LogInfo("\nMinion Count: " + strconv.Itoa(clc.miCount))
 
-	e := clc.initProvider()
 	if e != nil {
 		return nil, e
 	}
