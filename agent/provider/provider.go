@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/CenturylinkLabs/draycluster/deploy"
 	"strings"
-)
+    "github.com/CenturylinkLabs/draycluster/utils")
 
 type CloudProvider interface {
 	ProvisionAgent() (deploy.CloudServer, error)
@@ -12,13 +12,15 @@ type CloudProvider interface {
 
 func New(providerType string) CloudProvider {
 	pt := strings.TrimSpace(strings.ToLower(providerType))
+    utils.LogInfo(fmt.Sprintf("\n\nProvider:%s",pt))
 	switch string(pt) {
 	case "centurylink":
 		return NewCenturylink()
 	case "amazon":
-		fmt.Printf("\n\nAMAZON\n\n")
 		return NewAmazon()
+    case "digitalocean":
+  		return NewDigitalOcean()
 	}
-	fmt.Printf("NIL Provider:%s", pt)
+	fmt.Printf("\nNIL Provider:%s", pt)
 	return nil
 }
