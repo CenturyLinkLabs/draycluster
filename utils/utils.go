@@ -8,7 +8,9 @@ import (
 	"net"
 	"os"
 	"strings"
-)
+    "math/rand"
+    "time"
+    )
 
 func WaitForSSH(publicIP string) error {
 	for {
@@ -48,9 +50,20 @@ func LoadStdinToEnvAndKeys() error {
 			return e
 		} else if strings.Contains(ln, "=") {
 			kv := strings.SplitN(ln, "=", 2)
-			SetKey(kv[0], kv[1])
-			os.Setenv(kv[0], kv[1])
+            SetKey(kv[0], strings.TrimSpace(kv[1]))
+			os.Setenv(kv[0], strings.TrimSpace(kv[1]))
 		}
 	}
 	return nil
+}
+
+
+func RandSeq(n int) string {
+	var letters = []rune("abcdefghijklmnopqrstuvwxyz")
+	rand.Seed(time.Now().UTC().UnixNano())
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }

@@ -8,7 +8,6 @@ import (
 	"github.com/mitchellh/goamz/aws"
 	"github.com/mitchellh/goamz/ec2"
 	"golang.org/x/crypto/ssh"
-	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -104,7 +103,7 @@ func (amz *Amazon) getAmiID() (string, error) {
 func (amz *Amazon) createFWRules() (ec2.SecurityGroup, error) {
 
 	g := ec2.SecurityGroup{}
-	g.Name = "pmx-security-group-" + amz.randSeq(4)
+	g.Name = "pmx-security-group-" + utils.RandSeq(4)
 	g.Description = "panamax security group"
 	var ps []ec2.IPPerm
 
@@ -167,12 +166,7 @@ func (amz *Amazon) init() error {
 }
 
 func (amz *Amazon) importKey(puk string) (string, error) {
-	//    e := amz.init()
-	//        if e != nil {
-	//            return "", e
-	//        }
-
-	kn := "pmx-keypair-" + amz.randSeq(4)
+	kn := "pmx-keypair-" + utils.RandSeq(4)
 	_, e := amz.amzClient.ImportKeyPair(kn, puk)
 
 	if e != nil {
@@ -180,16 +174,6 @@ func (amz *Amazon) importKey(puk string) (string, error) {
 		return "", e
 	}
 	return kn, nil
-}
-
-func (amz Amazon) randSeq(n int) string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyz")
-	rand.Seed(time.Now().UTC().UnixNano())
-	b := make([]rune, n)
-	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(b)
 }
 
 func (amz Amazon) ExecSSHCmd(publicIP string, privateKey string, command string) string {

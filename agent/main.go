@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
 	"github.com/CenturylinkLabs/draycluster/agent/provider"
 	"github.com/CenturylinkLabs/draycluster/utils"
 	"os"
-)
+    "fmt")
 
 func main() {
 
