@@ -58,6 +58,7 @@ func (amz *Amazon) ProvisionCluster() ([]deploy.CloudServer, error) {
 			c.TCPOpenPorts = append(c.TCPOpenPorts, v)
 		}
 	}
+    c.UDPOpenPorts = []int{8285, 8472}
 
 	c.ServerNames = append(c.ServerNames, snMaster)
 	for i := 0; i < c.ServerCount-1; i++ {
