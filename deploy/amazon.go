@@ -26,6 +26,7 @@ type Amazon struct {
 	amzClient    *ec2.EC2
 	ServerCount  int
 	TCPOpenPorts []int
+    UDPOpenPorts []int
 	ServerNames  []string
     UserData     []byte
 }
@@ -111,6 +112,10 @@ func (amz *Amazon) createFWRules() (ec2.SecurityGroup, error) {
 	for _, p := range amz.TCPOpenPorts {
 		ps = append(ps, ec2.IPPerm{Protocol: "tcp", SourceIPs: []string{"0.0.0.0/0"}, ToPort: p, FromPort: p})
 	}
+    for _, p := range amz.UDPOpenPorts {
+    		ps = append(ps, ec2.IPPerm{Protocol: "udp", SourceIPs: []string{"0.0.0.0/0"}, ToPort: p, FromPort: p})
+    }
+
 
 	_, e := amz.amzClient.CreateSecurityGroup(g)
 	if e != nil {
