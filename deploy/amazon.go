@@ -1,216 +1,185 @@
 package deploy
 
 import (
-	"bytes"
-	"errors"
-	"fmt"
-	"github.com/CenturylinkLabs/draycluster/utils"
-	"github.com/mitchellh/goamz/aws"
-	"github.com/mitchellh/goamz/ec2"
-	"golang.org/x/crypto/ssh"
-	"os"
-	"strings"
-	"time"
-)
+    "errors"
+    "fmt"
+    "github.com/CenturylinkLabs/draycluster/utils"
+    "github.com/mitchellh/goamz/aws"
+    "github.com/mitchellh/goamz/ec2"
+    "os"
+    "strings"
+    "time"
+    )
 
 type Amazon struct {
-	VMSize       string
-	Location     string
-	ApiKeyID     string
-	ApiAccessKey string
-	AmiName      string
-	AmiOwnerId   string
-	SSHKeyName   string
-	PrivateKey   string
-	PublicKey    string
-	amzClient    *ec2.EC2
-	ServerCount  int
-	TCPOpenPorts []int
+    VMSize       string
+    Location     string
+    ApiKeyID     string
+    ApiAccessKey string
+    AmiName      string
+    AmiOwnerId   string
+    SSHKeyName   string
+    PrivateKey   string
+    PublicKey    string
+    amzClient    *ec2.EC2
+    ServerCount  int
+    TCPOpenPorts []int
     UDPOpenPorts []int
-	ServerNames  []string
+    ServerNames  []string
     UserData     []byte
 }
 
 func (amz *Amazon) DeployVMs() ([]CloudServer, error) {
-	var e error
-	e = amz.init()
-	if e != nil {
-		return nil, e
-	}
+    var e error
+    e = amz.init()
+    if e != nil {
+        return nil, e
+    }
 
-	amz.AmiName, e = amz.getAmiID()
-	if amz.AmiName == "" || e != nil {
-		return nil, errors.New("AMI Not found for provisioning. Cannot proceed.!!!")
-	}
-	utils.LogInfo(fmt.Sprintf("AMI Used: %s", amz.AmiName))
+    amz.AmiName, e = amz.getAmiID()
+    if amz.AmiName == "" || e != nil {
+        return nil, errors.New("AMI Not found for provisioning. Cannot proceed.!!!")
+    }
+    utils.LogInfo(fmt.Sprintf("AMI Used: %s", amz.AmiName))
 
-	if amz.SSHKeyName == "" && (amz.PublicKey != "" && amz.PrivateKey != "") {
-		amz.SSHKeyName, e = amz.importKey(amz.PublicKey)
-		if e != nil {
-			return nil, e
-		}
-	} else if amz.SSHKeyName == "" {
-		return nil, errors.New("Please pass ssh keyname or a Private Key & Public Key to create vms.")
-	}
+    if amz.SSHKeyName == "" && (amz.PublicKey != "" && amz.PrivateKey != "") {
+        amz.SSHKeyName, e = amz.importKey(amz.PublicKey)
+        if e != nil {
+            return nil, e
+        }
+    } else if amz.SSHKeyName == "" {
+        return nil, errors.New("Please pass ssh keyname or a Private Key & Public Key to create vms.")
+    }
 
-	sg, e := amz.createFWRules()
-	if e != nil {
-		return nil, e
-	}
+    sg, e := amz.createFWRules()
+    if e != nil {
+        return nil, e
+    }
 
-	req := &ec2.RunInstances{
-		ImageId:        amz.AmiName,
-		InstanceType:   amz.VMSize,
-		MinCount:       amz.ServerCount,
-		MaxCount:       amz.ServerCount,
-		KeyName:        amz.SSHKeyName,
-		SecurityGroups: []ec2.SecurityGroup{sg},
+    req := &ec2.RunInstances{
+        ImageId:        amz.AmiName,
+        InstanceType:   amz.VMSize,
+        MinCount:       amz.ServerCount,
+        MaxCount:       amz.ServerCount,
+        KeyName:        amz.SSHKeyName,
+        SecurityGroups: []ec2.SecurityGroup{sg},
         UserData:       amz.UserData,
-	}
+    }
 
-	resp, e := amz.amzClient.RunInstances(req)
-	if e != nil {
-		return nil, e
-	}
+    resp, e := amz.amzClient.RunInstances(req)
+    if e != nil {
+        return nil, e
+    }
 
-	utils.LogInfo("\nWaiting for servers to provision....")
+    utils.LogInfo("\nWaiting for servers to provision....")
 
-	var servers []CloudServer
-	for i, inst := range resp.Instances {
-		s, e := amz.waitForServer(inst)
-		if e != nil {
-			return nil, e
-		}
-		amz.amzClient.CreateTags([]string{inst.InstanceId}, []ec2.Tag{{Key: "Name", Value: amz.ServerNames[i]}})
-		s.Name = amz.ServerNames[i]
-		s.PrivateSSHKey = amz.PrivateKey
-		servers = append(servers, s)
-	}
-	utils.LogInfo("\nProvisioning complete...")
-	return servers, nil
+    var servers []CloudServer
+    for i, inst := range resp.Instances {
+        s, e := amz.waitForServer(inst)
+        if e != nil {
+            return nil, e
+        }
+        amz.amzClient.CreateTags([]string{inst.InstanceId}, []ec2.Tag{{Key: "Name", Value: amz.ServerNames[i]}})
+        s.Name = amz.ServerNames[i]
+        s.PrivateSSHKey = amz.PrivateKey
+        servers = append(servers, s)
+    }
+    utils.LogInfo("\nProvisioning complete...")
+    return servers, nil
 }
 
 func (amz *Amazon) getAmiID() (string, error) {
-	f := ec2.NewFilter()
-	f.Add("name", "*"+amz.AmiName+"*")
-	f.Add("owner-id", amz.AmiOwnerId)
-	im, _ := amz.amzClient.Images(nil, f)
-	if im != nil && len(im.Images) > 0 {
-		return im.Images[0].Id, nil
-	}
-	return "", errors.New("Image not found")
+    f := ec2.NewFilter()
+    f.Add("name", "*"+amz.AmiName+"*")
+    f.Add("owner-id", amz.AmiOwnerId)
+    im, _ := amz.amzClient.Images(nil, f)
+    if im != nil && len(im.Images) > 0 {
+        return im.Images[0].Id, nil
+    }
+    return "", errors.New("Image not found")
 }
 
 func (amz *Amazon) createFWRules() (ec2.SecurityGroup, error) {
 
-	g := ec2.SecurityGroup{}
-	g.Name = "pmx-security-group-" + utils.RandSeq(4)
-	g.Description = "panamax security group"
-	var ps []ec2.IPPerm
+    g := ec2.SecurityGroup{}
+    g.Name = "pmx-security-group-" + utils.RandSeq(4)
+    g.Description = "panamax security group"
+    var ps []ec2.IPPerm
 
-	amz.TCPOpenPorts = append(amz.TCPOpenPorts, 22)
-	for _, p := range amz.TCPOpenPorts {
-		ps = append(ps, ec2.IPPerm{Protocol: "tcp", SourceIPs: []string{"0.0.0.0/0"}, ToPort: p, FromPort: p})
-	}
+    amz.TCPOpenPorts = append(amz.TCPOpenPorts, 22)
+    for _, p := range amz.TCPOpenPorts {
+        ps = append(ps, ec2.IPPerm{Protocol: "tcp", SourceIPs: []string{"0.0.0.0/0"}, ToPort: p, FromPort: p})
+    }
     for _, p := range amz.UDPOpenPorts {
-    		ps = append(ps, ec2.IPPerm{Protocol: "udp", SourceIPs: []string{"0.0.0.0/0"}, ToPort: p, FromPort: p})
+        ps = append(ps, ec2.IPPerm{Protocol: "udp", SourceIPs: []string{"0.0.0.0/0"}, ToPort: p, FromPort: p})
     }
 
 
-	_, e := amz.amzClient.CreateSecurityGroup(g)
-	if e != nil {
-		return ec2.SecurityGroup{}, e
-	}
-	_, e = amz.amzClient.AuthorizeSecurityGroup(g, ps)
-	if e != nil {
-		return ec2.SecurityGroup{}, e
-	}
-	return g, nil
+    _, e := amz.amzClient.CreateSecurityGroup(g)
+    if e != nil {
+        return ec2.SecurityGroup{}, e
+    }
+    _, e = amz.amzClient.AuthorizeSecurityGroup(g, ps)
+    if e != nil {
+        return ec2.SecurityGroup{}, e
+    }
+    return g, nil
 }
 
 func (amz *Amazon) waitForServer(inst ec2.Instance) (CloudServer, error) {
-	for {
-		if inst.State.Code == 16 {
-			break
-		}
-		time.Sleep(10 * time.Second)
-		resp, e := amz.amzClient.Instances([]string{inst.InstanceId}, &ec2.Filter{})
-		if e != nil {
-			return CloudServer{}, e
-		}
-		inst = resp.Reservations[0].Instances[0]
-	}
-	utils.LogInfo(fmt.Sprintf("\nServer Provisioned: Public IP: %s, Private IP: %s", inst.PublicIpAddress, inst.PrivateIpAddress))
-	return CloudServer{PublicIP: inst.PublicIpAddress, Name: inst.DNSName, PrivateIP: inst.PrivateIpAddress}, nil
+    for {
+        if inst.State.Code == 16 {
+            break
+        }
+        time.Sleep(10 * time.Second)
+        resp, e := amz.amzClient.Instances([]string{inst.InstanceId}, &ec2.Filter{})
+        if e != nil {
+            return CloudServer{}, e
+        }
+        inst = resp.Reservations[0].Instances[0]
+    }
+    utils.LogInfo(fmt.Sprintf("\nServer Provisioned: Public IP: %s, Private IP: %s", inst.PublicIpAddress, inst.PrivateIpAddress))
+    return CloudServer{PublicIP: inst.PublicIpAddress, Name: inst.DNSName, PrivateIP: inst.PrivateIpAddress}, nil
 }
 
 func (amz *Amazon) init() error {
 
-	if amz.ApiKeyID == "" || amz.ApiAccessKey == "" || amz.Location == "" || amz.VMSize == "" || len(amz.ServerNames) != amz.ServerCount {
-		return errors.New("\n\nMissing Params Or No Matching AMI found...Check Docs...\n\n")
-	}
+    if amz.ApiKeyID == "" || amz.ApiAccessKey == "" || amz.Location == "" || amz.VMSize == "" || len(amz.ServerNames) != amz.ServerCount {
+        return errors.New("\n\nMissing Params Or No Matching AMI found...Check Docs...\n\n")
+    }
 
-	os.Setenv("AWS_ACCESS_KEY_ID", amz.ApiKeyID)
-	os.Setenv("AWS_SECRET_ACCESS_KEY", amz.ApiAccessKey)
+    os.Setenv("AWS_ACCESS_KEY_ID", amz.ApiKeyID)
+    os.Setenv("AWS_SECRET_ACCESS_KEY", amz.ApiAccessKey)
 
-	auth, e := aws.EnvAuth()
-	if e != nil {
-		return e
-	}
+    auth, e := aws.EnvAuth()
+    if e != nil {
+        return e
+    }
 
-	var r aws.Region
-	for _, r = range aws.Regions {
-		if strings.Contains(amz.Location, r.Name) {
-			break
-		}
-	}
+    var r aws.Region
+    for _, r = range aws.Regions {
+        if strings.Contains(amz.Location, r.Name) {
+            break
+        }
+    }
 
-	amz.amzClient = ec2.New(auth, r)
+    amz.amzClient = ec2.New(auth, r)
 
-	return nil
+    return nil
 }
 
 func (amz *Amazon) importKey(puk string) (string, error) {
-	kn := "pmx-keypair-" + utils.RandSeq(4)
-	_, e := amz.amzClient.ImportKeyPair(kn, puk)
+    kn := "pmx-keypair-" + utils.RandSeq(4)
+    _, e := amz.amzClient.ImportKeyPair(kn, puk)
 
-	if e != nil {
-		panic(e)
-		return "", e
-	}
-	return kn, nil
+    if e != nil {
+        panic(e)
+        return "", e
+    }
+    return kn, nil
 }
 
-func (amz Amazon) ExecSSHCmd(publicIP string, privateKey string, command string) string {
-
-	utils.LogInfo("\nWaiting for server to start before adding ssh keys")
-	e := utils.WaitForSSH(publicIP)
-
-	if e != nil {
-		panic(e)
-	}
-
-	k, e := ssh.ParsePrivateKey([]byte(privateKey))
-	if e != nil {
-		fmt.Println(e)
-		panic(e)
-	}
-
-	c := &ssh.ClientConfig{
-		User: "ec2-user",
-		Auth: []ssh.AuthMethod{ssh.PublicKeys(k)},
-	}
-
-	cn, _ := ssh.Dial("tcp", publicIP+":22", c)
-	s, _ := cn.NewSession()
-	defer s.Close()
-
-	var sOut bytes.Buffer
-	s.Stdout = &sOut
-	s.Run(command)
-
-	utils.LogInfo(sOut.String())
-	utils.LogInfo("\nCommand Complete")
-
-	return sOut.String()
+func (amz Amazon) ExecSSHCmd(publicIP string, privateKey string, command string) (string, error) {
+    return utils.ExecSSHCmd(publicIP, privateKey, "ec2-user", command)
 }
+

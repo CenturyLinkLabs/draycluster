@@ -1,44 +1,45 @@
 package provider
 
 import (
-	"github.com/CenturylinkLabs/draycluster/deploy"
-	"github.com/CenturylinkLabs/draycluster/utils"
-	"os"
+    "github.com/CenturylinkLabs/draycluster/deploy"
+    "github.com/CenturylinkLabs/draycluster/utils"
+    "os"
 )
 
 type Centurylink struct {
 }
 
 func NewCenturylink() CloudProvider {
-	c := Centurylink{}
-	return c
+    c := Centurylink{}
+    return c
 }
 
 func (clc Centurylink) ProvisionAgent() (deploy.CloudServer, error) {
 
-	pk, puk, _ := utils.CreateSSHKey()
+    pk, puk, _ := utils.CreateSSHKey()
 
-	c := deploy.Centurylink{
-		PublicSSHKey:   puk,
-		APIUsername:    os.Getenv("USERNAME"),
-		APIPassword:    os.Getenv("PASSWORD"),
-		GroupID:        os.Getenv("GROUP_ID"),
-		CPU:            1,
-		MemoryGB:       1,
-		TCPOpenPorts:   []int{3001},
-		ServerName:     "AGENT",
-		ServerTemplate: "UBUNTU-14-64-TEMPLATE",
-	}
+    c := deploy.Centurylink{
+        PublicSSHKey:   puk,
+        APIUsername:    os.Getenv("USERNAME"),
+        APIPassword:    os.Getenv("PASSWORD"),
+        GroupID:        os.Getenv("GROUP_ID"),
+        CPU:            1,
+        MemoryGB:       1,
+        TCPOpenPorts:   []int{3001},
+        ServerNames:     []string{"AGENT"},
+        ServerTemplate: "UBUNTU-14-64-TEMPLATE",
+        ServerCount:    1,
+    }
 
-	utils.LogInfo("\nWaiting for server creation")
+    utils.LogInfo("\nWaiting for server creation")
 
-	s, e := c.DeployVMs()
+    s, e := c.DeployVMs()
 
-	s[0].PrivateSSHKey = pk
-	s[0].PublicSSHKey = puk
+    s[0].PrivateSSHKey = pk
+    s[0].PublicSSHKey = puk
 
-	if e != nil {
-		return deploy.CloudServer{}, e
-	}
-	return s[0], nil
+    if e != nil {
+        return deploy.CloudServer{}, e
+    }
+    return s[0], nil
 }

@@ -2,21 +2,21 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
+//	"fmt"
 	"github.com/CenturylinkLabs/draycluster/kube/provider"
 	"github.com/CenturylinkLabs/draycluster/utils"
-	"os"
+//	"os"
 	"strings"
 )
 
 func main() {
 
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println(r)
-			os.Exit(1)
-		}
-	}()
+//	defer func() {
+//		if r := recover(); r != nil {
+//			fmt.Println(r)
+//			os.Exit(1)
+//		}
+//	}()1
 
     utils.CreateRootCerts()
 
