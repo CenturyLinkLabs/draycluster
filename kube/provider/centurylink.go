@@ -8,7 +8,8 @@ import (
     "os"
     "strconv"
     "strings"
-    "fmt")
+    "fmt"
+    )
 
 // Centurylink has the data that is used for provisioning a server. Most of the
 // data is passed in environment variables. The following env vars are required
@@ -48,8 +49,8 @@ func (clc Centurylink) ProvisionCluster() ([]deploy.CloudServer, error) {
 
     var sn []string
     sn = append(sn, "MASTER")
-    for i:= 0; i < clc.miCount; i++ {
-        sn = append(sn, fmt.Sprintf("MIN%d",i))
+    for i := 0; i < clc.miCount; i++ {
+        sn = append(sn, fmt.Sprintf("MIN%d", i))
     }
 
     c := deploy.Centurylink{
@@ -70,11 +71,14 @@ func (clc Centurylink) ProvisionCluster() ([]deploy.CloudServer, error) {
         return nil, e
     }
 
-    s[0].PrivateSSHKey = clc.masterPK
-    s[0].PublicSSHKey = clc.masterPuK
 
-    for i := 1; i <= clc.miCount; i++ {
-        s[i].PrivateSSHKey = ""
+    for i := 0; i <= clc.miCount; i++ {
+        if !strings.Contains(s[i].Name, "MASTER") {
+            s[i].PrivateSSHKey = ""
+        } else {
+            s[i].PrivateSSHKey = clc.masterPK
+            s[i].PublicSSHKey = clc.masterPuK
+        }
     }
 
     return s, nil
