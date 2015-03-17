@@ -84,7 +84,7 @@ func (clc *Centurylink) initProvider() error {
 
 func (clc *Centurylink) createServer(index int) (CloudServer, error) {
 
-    utils.LogInfo(fmt.Sprintf("\nDeploying Server: %d", index))
+    utils.LogInfo(fmt.Sprintf("\nDeploying Server: %s", clc.ServerNames[index]))
 
     s := clcgo.Server{
         Name:           clc.ServerNames[index],

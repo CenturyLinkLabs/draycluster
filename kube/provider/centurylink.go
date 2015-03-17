@@ -73,6 +73,7 @@ func (clc Centurylink) ProvisionCluster() ([]deploy.CloudServer, error) {
 
 
     for i := 0; i <= clc.miCount; i++ {
+        fmt.Printf("\n\n%s\n\n", s[i].Name)
         if !strings.Contains(s[i].Name, "MASTER") {
             s[i].PrivateSSHKey = ""
         } else {
