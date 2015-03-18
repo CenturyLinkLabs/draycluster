@@ -57,6 +57,9 @@ func (clc Centurylink) DeployVMs() ([]CloudServer, error) {
         select {
         case  out := <- ch :
             vs = append(vs, out.s)
+            if out.e != nil {
+                return vs, out.e
+            }
         }
     }
 
@@ -120,6 +123,10 @@ func (clc *Centurylink) createServer(index int) (CloudServer, error) {
 
     pubIP := clc.publicIPFromServer(s)
     priIP := clc.privateIPFromServer(s)
+
+    if pubIP == "" || priIP == "" {
+        return  CloudServer{}, errors.New("Missing IP on server")
+    }
 
     priKey := clc.PrivateSSHKey
     utils.LogInfo(fmt.Sprintf("\nPublicIP: %s, PrivateIP: %s", pubIP, priIP))
