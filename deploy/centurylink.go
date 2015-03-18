@@ -134,7 +134,7 @@ func (clc *Centurylink) createServer(index int) (CloudServer, error) {
         PrivateSSHKey: priKey,
     }
 
-    utils.LogInfo("Server deployment complete!!")
+    utils.LogInfo(fmt.Sprintf("Server deployment complete: %s", clc.ServerNames[index]))
 
     return pmxS, nil
 }
