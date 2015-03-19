@@ -7,16 +7,17 @@ import (
 	"github.com/CenturylinkLabs/draycluster/utils"
 //	"os"
 	"strings"
-)
+    "fmt"
+    "os")
 
 func main() {
 
-//	defer func() {
-//		if r := recover(); r != nil {
-//			fmt.Println(r)
-//			os.Exit(1)
-//		}
-//	}()1
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println(r)
+			os.Exit(1)
+		}
+	}()
 
     utils.CreateRootCerts()
 
