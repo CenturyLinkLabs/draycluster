@@ -2,12 +2,13 @@ package main
 
 import (
 	"encoding/base64"
-	"fmt"
+//	"fmt"
 	"github.com/CenturylinkLabs/draycluster/kube/provider"
 	"github.com/CenturylinkLabs/draycluster/utils"
-	"os"
+//	"os"
 	"strings"
-)
+    "fmt"
+    "os")
 
 func main() {
 
