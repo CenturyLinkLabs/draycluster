@@ -45,7 +45,7 @@ func (amz *Amazon) ProvisionCluster() ([]deploy.CloudServer, error) {
 	c.PublicKey = puk
 	c.ServerCount = cnt
 	c.VMSize = vmSize
-	c.AmiName = "CoreOS-stable-557.2.0-hvm"
+	c.AmiName = "CoreOS-stable-633.1.0-hvm"
 	c.AmiOwnerId = "595879546273"
     c.UserData = []byte(createCloudConfigCluster(puk))
 
