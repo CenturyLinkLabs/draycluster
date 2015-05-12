@@ -2,8 +2,8 @@ package main
 
 import (
 	"encoding/base64"
-	"github.com/CenturylinkLabs/draycluster/agent/provider"
-	"github.com/CenturylinkLabs/draycluster/utils"
+	"github.com/CenturyLinkLabs/draycluster/agent/provider"
+	"github.com/CenturyLinkLabs/draycluster/utils"
 	"os"
     "fmt")
 

@@ -3,8 +3,8 @@ package provider
 import (
 	"encoding/base64"
 	"errors"
-	"github.com/CenturylinkLabs/draycluster/deploy"
-	"github.com/CenturylinkLabs/draycluster/utils"
+	"github.com/CenturyLinkLabs/draycluster/deploy"
+	"github.com/CenturyLinkLabs/draycluster/utils"
 	"os"
 )
 

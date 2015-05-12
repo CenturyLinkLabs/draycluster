@@ -5,7 +5,7 @@ import (
     "errors"
     "github.com/digitalocean/godo"
     "time"
-    "github.com/CenturylinkLabs/draycluster/utils"
+    "github.com/CenturyLinkLabs/draycluster/utils"
     "strings")
 
 type DigitalOcean struct {
