@@ -2,11 +2,10 @@ package main
 
 import (
 	"encoding/base64"
-//	"fmt"
-	"github.com/CenturylinkLabs/draycluster/kube/provider"
-	"github.com/CenturylinkLabs/draycluster/utils"
-//	"os"
+	"github.com/CenturyLinkLabs/draycluster/kube/provider"
+	"github.com/CenturyLinkLabs/draycluster/utils"
 	"strings"
+
     "fmt"
     "os")
 

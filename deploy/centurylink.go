@@ -4,8 +4,8 @@ import (
     "bytes"
     "errors"
     "fmt"
-    "github.com/CenturylinkLabs/clcgo"
-    "github.com/CenturylinkLabs/draycluster/utils"
+    "github.com/CenturyLinkLabs/clcgo"
+    "github.com/CenturyLinkLabs/draycluster/utils"
     "golang.org/x/crypto/ssh"
     "time"
     )

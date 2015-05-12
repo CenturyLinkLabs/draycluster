@@ -2,7 +2,7 @@ package provider
 
 import "strings"
 import (
-    "github.com/CenturylinkLabs/draycluster/deploy"
+    "github.com/CenturyLinkLabs/draycluster/deploy"
 )
 
 // CloudProvider is used to deploy kubernetes cluster on any of the supported

@@ -2,9 +2,9 @@ package provider
 
 import (
     "errors"
-    "github.com/CenturylinkLabs/clcgo"
-    "github.com/CenturylinkLabs/draycluster/deploy"
-    "github.com/CenturylinkLabs/draycluster/utils"
+    "github.com/CenturyLinkLabs/clcgo"
+    "github.com/CenturyLinkLabs/draycluster/deploy"
+    "github.com/CenturyLinkLabs/draycluster/utils"
     "os"
     "strconv"
     "strings"
