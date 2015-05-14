@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	"github.com/CenturylinkLabs/draycluster/deploy"
+	"github.com/CenturyLinkLabs/draycluster/deploy"
 	"strings"
-    "github.com/CenturylinkLabs/draycluster/utils")
+    "github.com/CenturyLinkLabs/draycluster/utils")
 
 type CloudProvider interface {
 	ProvisionAgent() (deploy.CloudServer, error)

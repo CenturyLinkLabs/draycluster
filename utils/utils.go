@@ -11,7 +11,6 @@ import (
     "math/rand"
     "time"
     "golang.org/x/crypto/ssh"
-    "errors"
     "bytes")
 
 
@@ -21,7 +20,7 @@ func ExecSSHCmd(publicIP string, privateKey string, uname string, command string
 	e := WaitForSSH(publicIP)
 
 	if e != nil {
-		panic(e)
+		return "", e
 	}
 
     k, e := ssh.ParsePrivateKey([]byte(privateKey))
@@ -50,35 +49,11 @@ func ExecSSHCmd(publicIP string, privateKey string, uname string, command string
 
 
 func WaitForSSH(publicIP string) error {
-    r := make(chan error, 1)
-    to := time.After(60 * time.Second)
-    mt := 5
-    ct := 0
-
-    go func(publicIP string) {
-        r <- waitForSSH(publicIP)
-    }(publicIP)
-
-    select {
-    case <-r:
-        return nil;
-    case <-to:
-        if ct < mt {
-            go func(publicIP string) {
-                r <- waitForSSH(publicIP)
-            }(publicIP)
-            ct = ct + 1
-        }
-        return errors.New("SSH Failed")
-    }
-    return nil
-}
-
-func waitForSSH(publicIP string) error {
-    for {
+    for i:=0; i < 10; i++ {
         conn, e := net.Dial("tcp", publicIP+":22")
         if e != nil {
-            return e
+            time.Sleep(time.Second * 10)
+            continue
         }
         defer conn.Close()
         if _, e = conn.Read(make([]byte, 1)); e != nil {

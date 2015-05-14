@@ -3,13 +3,13 @@ package deploy
 import (
     "errors"
     "fmt"
-    "github.com/CenturylinkLabs/draycluster/utils"
+    "github.com/CenturyLinkLabs/draycluster/utils"
     "github.com/mitchellh/goamz/aws"
     "github.com/mitchellh/goamz/ec2"
     "os"
     "strings"
     "time"
-    )
+   )
 
 type Amazon struct {
     VMSize       string
@@ -131,9 +131,10 @@ func (amz *Amazon) waitForServer(inst ec2.Instance) (CloudServer, error) {
         if inst.State.Code == 16 {
             break
         }
-        time.Sleep(10 * time.Second)
+        time.Sleep(30 * time.Second)
         resp, e := amz.amzClient.Instances([]string{inst.InstanceId}, &ec2.Filter{})
         if e != nil {
+            panic(e)
             return CloudServer{}, e
         }
         inst = resp.Reservations[0].Instances[0]
