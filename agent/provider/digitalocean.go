@@ -49,7 +49,7 @@ func (do *DigitalOcean) ProvisionAgent() (deploy.CloudServer, error) {
     c.SSHKeyName = kn
     c.ServerCount = 1
     c.VMSize = "512mb"
-    c.ImageName = "ubuntu-14-10-x64"
+    c.ImageName = "ubuntu-15-04-x64"
     c.ServerNames  = []string{"Agent"}
 
     utils.LogInfo("\nDeploying Agent Server")
